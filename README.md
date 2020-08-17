@@ -13,7 +13,7 @@ Difference in specs result in huge design structure for implementation. We liste
 |Free Swap Fee for Self-Matched Swaps |X                      |X                      |O                    |
 |Passive Swap with Waiting Period     |X                      |X                      |O                    |
 |Base Token                           |No Base Token Concept  |One Base Token         |Multiple Base Token  |
-|Flash Swap                           |X                      |O                      |O                    |
+|Flash Swap                           |O                      |X                      |O                    |
 |Generalized Swap Price Function      |X                      |X                      |O                    |
 
 ### 3. Design considerations
