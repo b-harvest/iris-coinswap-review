@@ -3,6 +3,8 @@
 - to explain design consideration necessity for Hub liquidity module to AiB
 - to introduce brief review of IRIS-coinswap repository
 
+<br/><br/>
+
 ### 2. Comparisons among implementations
 
 Difference in specs result in huge design structure for implementation. We listed several feature comparisons to explain the reason why we need significant redesign considerations.
@@ -16,7 +18,11 @@ Difference in specs result in huge design structure for implementation. We liste
 |Flash Swap                           |O                      |X                      |O                    |
 |Generalized Swap Price Function      |X                      |X                      |O                    |
 
+<br/><br/>
+
 ### 3. Design considerations
+
+<br/>
 
 **1) Universal swap price**
 
@@ -27,6 +33,8 @@ Difference in specs result in huge design structure for implementation. We liste
     - However, in IRIS-coinswap module, in [Handler](https://github.com/irismod/coinswap/blob/acd65c0955884b15265972812dcffc70d0a7b0d7/handler.go#L10-L26) where messages are diverging into [handleMsgSwapOrder](https://github.com/irismod/coinswap/blob/acd65c0955884b15265972812dcffc70d0a7b0d7/handler.go#L35), [handleMsgAddLiquidity](https://github.com/irismod/coinswap/blob/acd65c0955884b15265972812dcffc70d0a7b0d7/handler.go#L60-L62) and [handleMsgRemoveLiquidity](https://github.com/irismod/coinswap/blob/acd65c0955884b15265972812dcffc70d0a7b0d7/handler.go#L84-L86). They are separately handled so that the strucutre does not allow universal swap price calculation in one location.
     - To calculate universal swap price, each handler function should only validate and store messages in a queue, and [EndBlock](https://github.com/irismod/coinswap/blob/805fda07404c37225e5ca6465b141955996fcda7/module.go#L152-L154) needs to calculate universal swap price from the queue.
 
+<br/>
+
 **2) Free swap fee for self-matched swaps**
 
 - Our universal swap price relates to free swap fee for self-matched swaps which are not considered in IRIS-coinswap fee calculation model.
@@ -36,6 +44,8 @@ Difference in specs result in huge design structure for implementation. We liste
     - To handle self-batched swaps, as in 1), we need to accumulate messages in a queue and execute self-matched swap algorithm in [EndBlock](https://github.com/irismod/coinswap/blob/805fda07404c37225e5ca6465b141955996fcda7/module.go#L152-L154).
     - We also need to adjust swap fee rate from self-matched swap ratio, so the self-matched swap ratio should be calculated in [EndBlock](https://github.com/irismod/coinswap/blob/805fda07404c37225e5ca6465b141955996fcda7/module.go#L152-L154) too.
 
+<br/>
+
 **3) Passive swap with waiting period**
 
 - Uniswap has significant disadvantage for swap users to account too much slippage cost to each swap.
@@ -44,6 +54,8 @@ Difference in specs result in huge design structure for implementation. We liste
 - IRIS-coinswap do not anticipate this problem so the codebase structure should be largely redesigned.
 - Code comments
     - Passive swap with waiting period needs queue structure for each liquidity module message to handle swap execution with accumulated message list in the queue.
+
+<br/>
 
 **4) Multiple base token assumption**
 
@@ -58,6 +70,8 @@ Difference in specs result in huge design structure for implementation. We liste
         - We will have multiple standardDenom such as Atom, USDT or USDX so that the market can create liquidity pools in more free way.
         - We will not support DoubleSwap because it can be easily executed by multiple swap messages wrapped from frontend.
 
+<br/>
+
 **5) Flash swap**
 
 - Flash swap is very useful economic functionality for Uniswap to make arbitrage activities more open to wider community members without significant capital possession. It makes arbitrage trading more competitive caused by lots of developers building and operating arbitrage machines which can be utilized without much of capital necessity. This ultimately result in efficiency of price discovery for pools to have much less impermenant losses from price volatilities.
@@ -65,6 +79,8 @@ Difference in specs result in huge design structure for implementation. We liste
 - Code comments
     - The transaction with flash swap messages should be atomically managed. It means that the messages should be success or fail in all-or-nothing way.
     - It needs deeper design consideration because the state machine need to deliverately gather information about failure of each message, which results in forced failure of rest of the messages in the transaction.
+
+<br/>
 
 **6) Generalized swap price derivation function design**
 
@@ -77,6 +93,8 @@ Difference in specs result in huge design structure for implementation. We liste
     - GetInputPrice, GetOutputPrice
         - [https://github.com/irismod/coinswap/blob/387c7e3327d3e1191554120823725ccdfae15384/internal/keeper/swap.go#L216-L234](https://github.com/irismod/coinswap/blob/387c7e3327d3e1191554120823725ccdfae15384/internal/keeper/swap.go#L216-L234)
     - Our solution needs to allow governance decided swap price derivation function to be used in liquidity pool. Also we need to consider different price functions for different categories of liquidity pool, so it needs further design consideration.
+
+<br/>
 
 **7) Lack of testing codes**
 
@@ -119,13 +137,18 @@ coinswap
 
 6 directories, 26 files
 ```
+<br/><br/>
 
 ### 4. **Conclusion**
+
+<br/>
 
 **Reusing existing codes is not an efficient approach** 
 
 - we expect that it will cost even more time by reusing currently existing liquidity modules than constructing it from scratch because existing modules needs heavy redesigning to comply with more generalized and flexible designs for necessary feature for near future.
 - the result codebase by reusing existing codes will be relatively less concise and clean.
+
+<br/>
 
 **Existing codes can be referenced for designing and implementation**
 
