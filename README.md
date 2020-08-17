@@ -1,7 +1,7 @@
 ### 1. Objective of this review
 
-- to explain design consideration necessity for Hub liquidity module to AiB
-- to introduce brief review of IRIS-coinswap repository
+- To explain design consideration necessity for Hub liquidity module to AiB
+- To introduce brief review of IRIS-coinswap repository
 
 <br/><br/>
 
